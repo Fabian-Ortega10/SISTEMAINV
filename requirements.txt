@@ -1,0 +1,8 @@
+django
+psycopg2-binary        # Conector para PostgreSQL (si usas MySQL, cambia por mysqlclient)
+djangorestframework    # Para crear APIs REST si quieres exponer servicios
+django-cors-headers    # Para manejar CORS si conectas con frontend externo
+django-environ         # Para gestionar variables de entorno de forma segura
+django-crispy-forms    # Para mejorar la presentación de formularios en la interfaz
+openpyxl               # Para exportar/importar datos en Excel
+reportlab              # Para generar reportes PDF
