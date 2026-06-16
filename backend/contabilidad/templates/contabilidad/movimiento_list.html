@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Movimientos Contables{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="/">Inicio</a></li>
+<li class="breadcrumb-item active" aria-current="page">Contabilidad</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-3">Lista de Movimientos Contables</h2>
+
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Tipo</th>
+                <th>Descripción</th>
+                <th>Monto</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for movimiento in object_list %}
+            <tr>
+                <td>{{ movimiento.id }}</td>
+                <td>{{ movimiento.fecha }}</td>
+                <td>{{ movimiento.tipo }}</td>
+                <td>{{ movimiento.descripcion }}</td>
+                <td>{{ movimiento.monto }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No hay movimientos contables registrados.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'contabilidad:movimiento_create' %}" class="btn btn-primary">Registrar Nuevo Movimiento</a>
+</div>
+{% endblock %}
+

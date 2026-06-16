@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}Registrar Nueva Auditoría{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="/">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'auditoria:lista_auditoria' %}">Auditoría</a></li>
+<li class="breadcrumb-item active" aria-current="page">Registrar Nueva Auditoría</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-3">Registrar Nueva Auditoría</h2>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+            <div class="mb-3">
+                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                {{ field }}
+                {% if field.errors %}
+                    <div class="text-danger">{{ field.errors }}</div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{% url 'auditoria:lista_auditoria' %}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}

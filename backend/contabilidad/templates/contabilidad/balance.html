@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Balance Contable{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="/">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'contabilidad:movimiento_list' %}">Contabilidad</a></li>
+<li class="breadcrumb-item active" aria-current="page">Balance</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Balance Contable</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card border-success">
+                <div class="card-header bg-success text-white">
+                    <strong>Total Ingresos</strong>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-success">${{ ingresos|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <strong>Total Egresos</strong>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="text-danger">${{ egresos|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card {% if balance >= 0 %}border-primary{% else %}border-warning{% endif %}">
+                <div class="card-header {% if balance >= 0 %}bg-primary{% else %}bg-warning{% endif %} text-white">
+                    <strong>Balance</strong>
+                </div>
+                <div class="card-body text-center">
+                    <h3 class="{% if balance >= 0 %}text-primary{% else %}text-warning{% endif %}">
+                        ${{ balance|floatformat:2 }}
+                    </h3>
+                    <small class="text-muted">
+                        {% if balance >= 0 %}Superávit{% else %}Déficit{% endif %}
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex gap-2">
+        <a href="{% url 'contabilidad:movimiento_list' %}" class="btn btn-secondary">Ver movimientos</a>
+        <a href="{% url 'contabilidad:movimiento_create' %}" class="btn btn-primary">Registrar movimiento</a>
+    </div>
+</div>
+{% endblock %}

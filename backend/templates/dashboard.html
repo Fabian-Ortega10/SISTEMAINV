@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — SISTEMAINV{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item active" aria-current="page">Inicio</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <h2 class="mb-1">Dashboard</h2>
+    <p class="text-muted mb-4">{{ hoy }}</p>
+
+    {# ── Fila 1: KPIs principales ── #}
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-primary h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 fw-bold text-primary">{{ total_productos }}</div>
+                    <div class="text-muted">Productos en inventario</div>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'inventario:producto_list' %}" class="btn btn-sm btn-outline-primary">Ver inventario</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-success h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 fw-bold text-success">{{ ventas_hoy }}</div>
+                    <div class="text-muted">Ventas hoy</div>
+                    <small class="text-muted">{{ total_ventas }} en total</small>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'ventas:venta_list' %}" class="btn btn-sm btn-outline-success">Ver ventas</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-warning h-100">
+                <div class="card-body text-center">
+                    <div class="fs-1 fw-bold text-warning">{{ ordenes_pendientes }}</div>
+                    <div class="text-muted">Órdenes producción pendientes</div>
+                    <small class="text-muted">{{ ordenes_finalizadas }} finalizadas</small>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'produccion:ordenproduccion_list' %}" class="btn btn-sm btn-outline-warning">Ver producción</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card {% if balance >= 0 %}border-info{% else %}border-danger{% endif %} h-100">
+                <div class="card-body text-center">
+                    <div class="fs-2 fw-bold {% if balance >= 0 %}text-info{% else %}text-danger{% endif %}">
+                        ${{ balance|floatformat:0 }}
+                    </div>
+                    <div class="text-muted">Balance actual</div>
+                    <small class="text-muted">
+                        ↑ ${{ ingresos|floatformat:0 }} &nbsp;|&nbsp; ↓ ${{ egresos|floatformat:0 }}
+                    </small>
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'contabilidad:reporte_balance' %}" class="btn btn-sm btn-outline-info">Ver balance</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    {# ── Fila 2: Alertas de stock bajo + Últimas ventas ── #}
+    <div class="row g-3">
+
+        <div class="col-md-5">
+            <div class="card h-100">
+                <div class="card-header bg-danger text-white">
+                    <strong>⚠ Stock bajo (≤ 5 unidades)</strong>
+                </div>
+                <div class="card-body p-0">
+                    {% if productos_stock_bajo %}
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Stock</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for p in productos_stock_bajo %}
+                                <tr>
+                                    <td>{{ p.nombre }}</td>
+                                    <td class="text-center">
+                                        <span class="badge {% if p.stock == 0 %}bg-danger{% else %}bg-warning text-dark{% endif %}">
+                                            {{ p.stock }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="p-3 text-center text-muted">
+                            Todos los productos tienen stock suficiente.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'compras:ordencompra_create' %}" class="btn btn-sm btn-outline-danger">+ Nueva orden de compra</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-7">
+            <div class="card h-100">
+                <div class="card-header bg-success text-white">
+                    <strong>Últimas 5 ventas</strong>
+                </div>
+                <div class="card-body p-0">
+                    {% if ultimas_ventas %}
+                        <table class="table table-sm mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for venta in ultimas_ventas %}
+                                <tr>
+                                    <td>{{ venta.id }}</td>
+                                    <td>{{ venta.cliente }}</td>
+                                    <td>{{ venta.fecha }}</td>
+                                    <td>${{ venta.get_total|floatformat:0 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    {% else %}
+                        <div class="p-3 text-center text-muted">
+                            No hay ventas registradas aún.
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer text-center">
+                    <a href="{% url 'ventas:venta_create' %}" class="btn btn-sm btn-outline-success">+ Nueva venta</a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+{% endblock %}

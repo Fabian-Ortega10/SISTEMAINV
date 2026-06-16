@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{% if object %}Orden de Producción #{{ object.id }}{% else %}Nueva Orden de Producción{% endif %}{% endblock %}
+
+{% block breadcrumbs %}
+<li class="breadcrumb-item"><a href="/">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'produccion:ordenproduccion_list' %}">Producción</a></li>
+<li class="breadcrumb-item active" aria-current="page">
+    {% if object %}Orden #{{ object.id }}{% else %}Nueva Orden{% endif %}
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">{% if object %}Orden de Producción #{{ object.id }}{% else %}Nueva Orden de Producción{% endif %}</h2>
+
+    {% if object.ya_finalizada %}
+        <div class="alert alert-success">
+            Esta orden ya fue <strong>finalizada</strong> el {{ object.finalizada_en }}.
+            El stock ya fue actualizado y los materiales/productos no pueden modificarse.
+        </div>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        {# Datos generales de la orden #}
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <strong>Datos de la orden</strong>
+            </div>
+            <div class="card-body">
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                            <div class="text-danger small">{{ field.errors }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                {% if object.ya_finalizada %}
+                    <small class="text-muted">
+                        El estado no puede cambiar de "Finalizada" a "Pendiente".
+                    </small>
+                {% else %}
+                    <small class="text-muted">
+                        Al cambiar el estado a "Finalizada" y guardar, el sistema descontará
+                        automáticamente las materias primas y agregará los productos finales al stock.
+                    </small>
+                {% endif %}
+            </div>
+        </div>
+
+        {# Materias primas consumidas #}
+        <div class="card mb-4">
+            <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+                <strong>Materias primas consumidas</strong>
+                {% if not object.ya_finalizada %}
+                    <button type="button" class="btn btn-sm btn-light" id="agregar-consumo">+ Agregar material</button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {{ consumo_formset.management_form }}
+                <table class="table table-bordered" id="tabla-consumo">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto (materia prima)</th>
+                            <th>Cantidad</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="formset-body-consumo">
+                        {% for f in consumo_formset %}
+                            <tr class="formset-row-consumo">
+                                <td>{{ f.producto }}</td>
+                                <td>{{ f.cantidad }}</td>
+                                <td class="text-center">
+                                    {% if f.instance.pk %}
+                                        {{ f.DELETE }}
+                                    {% else %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger eliminar-fila-consumo">✕</button>
+                                    {% endif %}
+                                    {{ f.id }}
+                                </td>
+                                {% if f.errors %}
+                                    <tr><td colspan="3" class="text-danger small">{{ f.errors }}</td></tr>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {# Productos finales generados #}
+        <div class="card mb-4">
+            <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                <strong>Productos finales generados</strong>
+                {% if not object.ya_finalizada %}
+                    <button type="button" class="btn btn-sm btn-light" id="agregar-final">+ Agregar producto</button>
+                {% endif %}
+            </div>
+            <div class="card-body">
+                {{ final_formset.management_form }}
+                <table class="table table-bordered" id="tabla-final">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Producto terminado</th>
+                            <th>Cantidad</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="formset-body-final">
+                        {% for f in final_formset %}
+                            <tr class="formset-row-final">
+                                <td>{{ f.producto }}</td>
+                                <td>{{ f.cantidad }}</td>
+                                <td class="text-center">
+                                    {% if f.instance.pk %}
+                                        {{ f.DELETE }}
+                                    {% else %}
+                                        <button type="button" class="btn btn-sm btn-outline-danger eliminar-fila-final">✕</button>
+                                    {% endif %}
+                                    {{ f.id }}
+                                </td>
+                                {% if f.errors %}
+                                    <tr><td colspan="3" class="text-danger small">{{ f.errors }}</td></tr>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success">Guardar</button>
+            <a href="{% url 'produccion:ordenproduccion_list' %}" class="btn btn-secondary">Cancelar</a>
+        </div>
+    </form>
+</div>
+
+{% if not object.ya_finalizada %}
+<script>
+    function activarFormset(addBtnId, formsetBodyId, totalFormsId, rowClass, deleteClass) {
+        const addBtn = document.getElementById(addBtnId);
+        const formsetBody = document.getElementById(formsetBodyId);
+        const totalForms = document.getElementById(totalFormsId);
+
+        if (!addBtn) return;
+
+        addBtn.addEventListener('click', function () {
+            const formCount = parseInt(totalForms.value);
+            const rows = formsetBody.querySelectorAll('.' + rowClass);
+            const lastRow = rows[rows.length - 1];
+            const newRow = lastRow.cloneNode(true);
+
+            newRow.querySelectorAll('input, select').forEach(el => {
+                el.name = el.name.replace(/-\d+-/, `-${formCount}-`);
+                el.id = el.id.replace(/-\d+-/, `-${formCount}-`);
+                if (el.type !== 'hidden') el.value = '';
+            });
+
+            const deleteCheckbox = newRow.querySelector('input[type=checkbox]');
+            if (deleteCheckbox) {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'btn btn-sm btn-outline-danger ' + deleteClass;
+                btn.textContent = '✕';
+                deleteCheckbox.replaceWith(btn);
+            }
+
+            formsetBody.appendChild(newRow);
+            totalForms.value = formCount + 1;
+
+            newRow.querySelector('.' + deleteClass)?.addEventListener('click', function () {
+                newRow.remove();
+                totalForms.value = parseInt(totalForms.value) - 1;
+            });
+        });
+
+        document.querySelectorAll('.' + deleteClass).forEach(btn => {
+            btn.addEventListener('click', function () {
+                btn.closest('tr').remove();
+                totalForms.value = parseInt(totalForms.value) - 1;
+            });
+        });
+    }
+
+    activarFormset('agregar-consumo', 'formset-body-consumo', 'id_consumo-TOTAL_FORMS', 'formset-row-consumo', 'eliminar-fila-consumo');
+    activarFormset('agregar-final', 'formset-body-final', 'id_final-TOTAL_FORMS', 'formset-row-final', 'eliminar-fila-final');
+</script>
+{% endif %}
+{% endblock %}

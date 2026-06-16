@@ -1,0 +1,40 @@
+# Python - Archivos compilados y caché
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Entornos virtuales (Todos los nombres posibles)
+.venv/
+venv/
+venv311/
+ENV/
+env/
+**/venv311/
+**/venv/
+**/.venv/
+
+# Configuración local y credenciales (Base de datos y llaves)
+.env
+*.env
+local_settings.py
+db.sqlite3
+
+# PostgreSQL / Archivos temporales o de volcado de datos
+*.sql
+*.dump
+
+# Carpetas de editores de código
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# Archivos del sistema operativo
+Thumbs.db
+desktop.ini
+.DS_Store
