@@ -1,131 +1,232 @@
-SISTEMAINV
-Sistema de Inventarios desarrollado en Python con Django y PostgreSQL.
-El sistema está diseñado para gestionar productos, compras, ventas, contabilidad y auditoría, ofreciendo una solución modular, escalable y con trazabilidad completa.
+# SISTEMAINV
 
-1. Características principales
-Inventario: CRUD de categorías y productos, control de stock y precios.
+> Sistema ERP para gestión integral de una zapatería — desarrollado en **Django 6 + PostgreSQL**.
 
-Compras: registro de órdenes de compra, asociación con proveedores, actualización automática de stock y generación de egresos contables.
+---
 
-Ventas: registro de ventas, disminución de stock, generación de comprobantes/facturas y creación de ingresos contables.
+## Descripción
 
-Contabilidad: registro automático de ingresos y egresos, cálculo de balance y flujo de caja mediante comandos de gestión.
+SISTEMAINV es un sistema de gestión empresarial (ERP) diseñado específicamente para zapaterías. Cubre el ciclo completo del negocio: desde la compra de materias primas, pasando por la producción, hasta la venta del producto terminado — con trazabilidad completa, control de stock en tiempo real y registro contable automático.
 
-Auditoría: historial de acciones de usuarios y trazabilidad de cambios en compras y ventas.
+---
 
-Reportes: listados y exportación en formatos estándar (CSV, PDF), además de comandos personalizados (python manage.py reporte_contable).
+## Módulos implementados
 
-Roles y permisos: sistema de grupos con permisos específicos:
-    Admin → acceso completo.
-    Vendedor → acceso a Inventario y Ventas.
-    Inventarista → acceso a Inventario y Compras.
-    Contador → acceso a Contabilidad.
-    Auditor → acceso a Auditoría.
+### Inventario
+- CRUD completo de productos y categorías
+- Control de stock en tiempo real
+- Alertas de stock bajo en el dashboard
+- Exportación a CSV
 
-2. Requerimientos previos
-Python 3.x
+### Compras
+- Registro de órdenes de compra con líneas de detalle (formulario inline)
+- CRUD de proveedores
+- Actualización automática de stock al registrar una compra
+- Generación automática de egreso contable
+- Exportación a CSV
 
-Django
+### Ventas
+- Registro de ventas con líneas de detalle (formulario inline)
+- CRUD de clientes
+- Disminución automática de stock al registrar una venta
+- Generación automática de ingreso contable
+- Cálculo de total por venta
+- Exportación a CSV
 
-PostgreSQL
+### Producción
+- Registro de órdenes de producción con materias primas consumidas y productos finales
+- Flujo controlado: la orden se planea en estado **Pendiente** sin afectar stock
+- Al **Finalizar** la orden: descuenta materias primas, aumenta productos terminados y registra movimientos contables automáticamente
+- Validación de stock insuficiente con reversión automática
+- Órdenes finalizadas bloqueadas para evitar duplicación de movimientos
 
-Git
+### Contabilidad
+- Registro automático de ingresos y egresos desde ventas, compras y producción
+- Vista de balance con total de ingresos, egresos y saldo
+- Registro manual de movimientos adicionales
 
-Entorno virtual (venv)
+### Auditoría
+- Historial automático de todas las acciones (CREAR, ACTUALIZAR, ELIMINAR)
+- Implementado con **Django Signals** — completamente desacoplado de los modelos
+- Captura el usuario de sesión en cada registro via middleware
 
-3. Instalación y configuración
-Clona el repositorio:
+### Dashboard
+- KPIs en tiempo real: productos en inventario, ventas del día, órdenes de producción pendientes, balance actual
+- Alertas visuales de stock bajo (≤ 5 unidades)
+- Últimas 5 ventas registradas
+- Accesos rápidos a las acciones más frecuentes
+
+### Autenticación y roles
+- Login/logout propio (independiente del admin de Django)
+- Sistema de roles con permisos granulares por módulo:
+
+| Rol | Acceso |
+|---|---|
+| **Admin** | Acceso completo a todos los módulos |
+| **Vendedor** | Inventario y Ventas |
+| **Inventarista** | Inventario y Compras |
+| **Contador** | Contabilidad |
+| **Auditor** | Auditoría |
+
+---
+
+## Stack tecnológico
+
+| Tecnología | Uso |
+|---|---|
+| Python 3.12 | Lenguaje principal |
+| Django 6 | Framework web |
+| PostgreSQL | Base de datos |
+| Bootstrap 5 | Interfaz de usuario |
+| WhiteNoise | Archivos estáticos en producción |
+| python-dotenv | Variables de entorno |
+| dj-database-url | Configuración de BD en Render |
+| Render.com | Despliegue en la nube |
+
+---
+
+## Instalación local
+
+### 1. Clona el repositorio
+```bash
 git clone https://github.com/Fabian-Ortega10/SISTEMAINV.git
 cd SISTEMAINV
+```
 
-Crea y activa el entorno virtual:
+### 2. Crea y activa el entorno virtual
+```bash
 python -m venv .venv
-source .venv/bin/activate   # Linux/Mac
-.venv\Scripts\activate      # Windows
+.venv\Scripts\activate        # Windows
+source .venv/bin/activate     # Linux/Mac
+```
 
-Instala las dependencias:
+### 3. Instala las dependencias
+```bash
 pip install -r requirements.txt
+```
 
-Configura la base de datos en backend/sistemainv/settings.py.
-Para PostgreSQL: define usuario, contraseña, host y puerto.
+### 4. Configura las variables de entorno
+Crea un archivo `.env` en la carpeta `backend/` (junto a `manage.py`):
 
-Aplica migraciones:
+```env
+SECRET_KEY=tu_clave_secreta_larga_y_aleatoria
+DEBUG=True
+
+DB_NAME=sistemainv
+DB_USER=tu_usuario_postgres
+DB_PASSWORD=tu_contraseña_postgres
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+Para generar una `SECRET_KEY` segura:
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(60))"
+```
+
+### 5. Aplica las migraciones
+```bash
+cd backend
 python manage.py migrate
+```
 
-Crea un superusuario:
+### 6. Crea el superusuario
+```bash
 python manage.py createsuperuser
+```
 
-Levanta el servidor:
+### 7. Crea los roles del sistema
+```bash
+python manage.py crear_roles
+```
+
+### 8. Levanta el servidor
+```bash
 python manage.py runserver
-Accede al panel de administración en:
-http://127.0.0.1:8000/admin/
+```
 
-4. Casos de uso principales
-CRUD de productos y categorías en inventario.
+Accede en: `http://127.0.0.1:8000`
 
-Registro de compras → stock aumenta, se genera egreso contable y registro de auditoría.
+---
 
-Registro de ventas → stock disminuye, se genera ingreso contable y registro de auditoría.
+## ☁️ Despliegue en Render
 
-Auditoría → historial de acciones de usuarios.
+El proyecto está configurado para desplegarse en [Render.com](https://render.com).
 
-Reportes → generación de balance y flujo de caja con:
-python manage.py reporte_contable
+Variables de entorno a configurar en el panel de Render:
 
-5. Estructura del proyecto
+```
+SECRET_KEY=tu_clave_secreta
+DEBUG=False
+DATABASE_URL=postgresql://...  (la provee Render automáticamente)
+```
+
+---
+
+## Estructura del proyecto
+
+```
 SISTEMAINV/
-│── .gitignore
-│── README.md
-│── requirements.txt
-│── LICENSE
-│── backend/
-    │── manage.py
-    │── sistemainv/
-    │── inventario/
-    │── compras/
-    │── ventas/
-    │── contabilidad/
-    │   └── management/
-    │       └── commands/
-    │           └── reporte_contable.py
-    │── auditoria/
+├── .gitignore
+├── README.md
+├── requirements.txt
+├── LICENSE
+└── backend/
+    ├── manage.py
+    ├── .env                  ← NO se sube a git
+    ├── sistemainv/           ← Configuración del proyecto
+    │   ├── settings.py
+    │   ├── urls.py
+    │   └── views.py          ← Dashboard
+    ├── core/
+    │   └── services/
+    │       └── inventario.py ← Lógica de stock y contabilidad
+    ├── inventario/
+    ├── compras/
+    ├── ventas/
+    ├── produccion/
+    ├── contabilidad/
+    ├── auditoria/
+    │   ├── signals.py        ← Auditoría automática
+    │   └── middleware.py     ← Captura usuario de sesión
+    ├── templates/
+    │   ├── base.html
+    │   ├── dashboard.html
+    │   └── registration/
+    │       └── login.html
+    └── static/
+        └── css/
+            └── styles.css
+```
 
-6. Estado actual
-Inventario, Compras, Ventas, Contabilidad y Auditoría implementados y funcionando en Django Admin.
+---
 
-Superusuario creado y acceso al panel de administración operativo.
+## Flujo del negocio
 
-Reporte contable básico disponible vía comando de gestión.
+```
+Compra de materias primas
+        ↓
+  Stock aumenta automáticamente
+  Egreso contable registrado
+        ↓
+  Orden de producción (Pendiente)
+  Planear consumos y productos finales
+        ↓
+  Finalizar orden de producción
+  Materias primas descontadas
+  Productos terminados aumentados
+  Movimientos contables registrados
+        ↓
+  Venta del producto terminado
+  Stock disminuye automáticamente
+  Ingreso contable registrado
+        ↓
+  Dashboard → KPIs en tiempo real
+  Balance → Ingresos vs Egresos
+```
 
-Repositorio en GitHub con documentación organizada y profesional.
+---
 
-7. Licencia
-Este proyecto está bajo la licencia incluida en el archivo LICENSE.
+## Licencia
 
-8. Arquitectura del Sistema:
-   https://copilot.microsoft.com/th/id/BCO.028fbc03-b47a-4792-b5e5-6424472861d2.png
-El sistema SISTEMAINV está organizado en módulos independientes que se comunican entre sí, garantizando escalabilidad y trazabilidad:
-
-Inventario
-Productos
-Categorías
-Compras
-Órdenes de compra
-Proveedores
-Ventas
-Registro de ventas
-Facturación
-Contabilidad
-Movimientos contables
-Balance y reportes
-Auditoría
-Registros de auditoría
-Trazabilidad de cambios
-
-1. Roles y permisos
-El sistema implementa control de acceso basado en grupos:
-    Admin → acceso completo a todos los módulos.
-    Inventarista → acceso a Inventario y Compras.
-    Vendedor → acceso a Inventario y Ventas.
-    Contador → acceso a Contabilidad.
-    Auditor → acceso a Auditoría.
+Este proyecto está bajo la licencia incluida en el archivo `LICENSE`.
