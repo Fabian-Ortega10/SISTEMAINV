@@ -3,41 +3,53 @@
 {% block title %}Iniciar Sesión{% endblock %}
 
 {% block breadcrumbs %}
-<li class="breadcrumb-item"><a href="/">Inicio</a></li>
+<li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
 <li class="breadcrumb-item active" aria-current="page">Iniciar Sesión</li>
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-5">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <strong>Iniciar Sesión</strong>
-                </div>
-                <div class="card-body">
-                    {% if form.errors %}
-                        <div class="alert alert-danger">
-                            Usuario o contraseña incorrectos. Intenta de nuevo.
-                        </div>
-                    {% endif %}
+<div class="login-page">
+    <div class="login-card">
 
-                    <form method="post">
-                        {% csrf_token %}
-                        <div class="mb-3">
-                            <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
-                            {{ form.username }}
-                        </div>
-                        <div class="mb-3">
-                            <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
-                            {{ form.password }}
-                        </div>
-                        <input type="hidden" name="next" value="{{ next }}">
-                        <button type="submit" class="btn btn-primary w-100">Entrar</button>
-                    </form>
-                </div>
-            </div>
+        <!-- Logo + bienvenida -->
+        <div class="login-brand">
+            <svg width="56" height="56" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 2 L95 26.5 L95 88.5 L50 113 L5 88.5 L5 26.5 Z" fill="url(#hexGradLogin)"/>
+                <path d="M62 38 C62 38 36 36 36 48 C36 58 62 56 62 67 C62 79 36 77 36 77"
+                      stroke="white" stroke-width="9" stroke-linecap="round"
+                      stroke-linejoin="round" fill="none"/>
+                <defs>
+                    <linearGradient id="hexGradLogin" x1="0" y1="0" x2="100" y2="115" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#0f3460"/>
+                        <stop offset="100%" stop-color="#e94560"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+
+            <h2 class="login-welcome">Bienvenido</h2>
+            <p class="login-subtitle">Ingresa a SISTEMA<span class="text-accent">INV</span> para continuar</p>
         </div>
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                Usuario o contraseña incorrectos. Intenta de nuevo.
+            </div>
+        {% endif %}
+
+        <form method="post" class="login-form">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="{{ form.username.id_for_label }}" class="form-label">Usuario</label>
+                {{ form.username }}
+            </div>
+            <div class="mb-3">
+                <label for="{{ form.password.id_for_label }}" class="form-label">Contraseña</label>
+                {{ form.password }}
+            </div>
+            <input type="hidden" name="next" value="{{ next }}">
+            <button type="submit" class="btn-login-submit w-100">Entrar</button>
+        </form>
+
     </div>
 </div>
 {% endblock %}

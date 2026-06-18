@@ -3,45 +3,87 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}SISTEMAINV{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
 
-    <header class="bg-dark text-white py-3">
-        <div class="container">
-            <h1 class="h3">SISTEMAINV - Sistema Zapatería</h1>
+    <!-- HEADER CON LOGO -->
+    <header class="site-header">
+        <div class="container d-flex align-items-center gap-3">
+
+            <!-- LOGO SVG — hexágono con S, colores del sistema -->
+            <a href="{% url 'dashboard' %}" class="text-decoration-none d-flex align-items-center gap-3">
+                <svg width="42" height="42" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Hexágono exterior -->
+                    <path d="M50 2 L95 26.5 L95 88.5 L50 113 L5 88.5 L5 26.5 Z"
+                          fill="url(#hexGrad)" />
+                    <!-- Hexágono interior (borde interno) -->
+                    <path d="M50 12 L87 32.5 L87 82.5 L50 103 L13 82.5 L13 32.5 Z"
+                          fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+                    <!-- Letra S -->
+                    <path d="M62 38 C62 38 36 36 36 48 C36 58 62 56 62 67 C62 79 36 77 36 77"
+                          stroke="white" stroke-width="9" stroke-linecap="round"
+                          stroke-linejoin="round" fill="none"/>
+                    <!-- Gradiente -->
+                    <defs>
+                        <linearGradient id="hexGrad" x1="0" y1="0" x2="100" y2="115" gradientUnits="userSpaceOnUse">
+                            <stop offset="0%" stop-color="#0f3460"/>
+                            <stop offset="100%" stop-color="#e94560"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <!-- Texto del logo -->
+                <div>
+                    <div class="site-title">SISTEMA<span class="site-title-accent">INV</span></div>
+                    <div class="site-subtitle">Sistema de Gestión · Zapatería</div>
+                </div>
+            </a>
+
         </div>
     </header>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <!-- NAVBAR -->
+    <nav class="navbar navbar-expand-lg navbar-dark site-navbar">
         <div class="container">
-            <a class="navbar-brand" href="{% url 'dashboard' %}">Inicio</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal" aria-controls="menuPrincipal" aria-expanded="false" aria-label="Toggle navigation">
+            <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse"
+                data-bs-target="#menuPrincipal" aria-controls="menuPrincipal"
+                aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
             <div class="collapse navbar-collapse" id="menuPrincipal">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav me-auto">
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">🏠 Inicio</a>
+                    </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navInventario" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navInventario"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Inventario
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navInventario">
-                            <li><a class="dropdown-item" href="{% url 'inventario:producto_list' %}">Productos</a></li>
-                            <li><a class="dropdown-item" href="{% url 'inventario:categoria_list' %}">Categorías</a></li>
+                            <li><h6 class="dropdown-header">Inventario</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:producto_list' %}">📦 Productos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventario:categoria_list' %}">🏷️ Categorías</a></li>
                         </ul>
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navCompras" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navCompras"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Compras
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navCompras">
-                            <li><a class="dropdown-item" href="{% url 'compras:ordencompra_list' %}">Órdenes de Compra</a></li>
-                            <li><a class="dropdown-item" href="{% url 'compras:proveedor_list' %}">Proveedores</a></li>
+                            <li><h6 class="dropdown-header">Compras</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'compras:ordencompra_list' %}">🛒 Órdenes de Compra</a></li>
+                            <li><a class="dropdown-item" href="{% url 'compras:proveedor_list' %}">🏭 Proveedores</a></li>
                         </ul>
                     </li>
 
@@ -50,22 +92,26 @@
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navVentas" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navVentas"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Ventas
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navVentas">
-                            <li><a class="dropdown-item" href="{% url 'ventas:venta_list' %}">Ventas</a></li>
-                            <li><a class="dropdown-item" href="{% url 'ventas:cliente_list' %}">Clientes</a></li>
+                            <li><h6 class="dropdown-header">Ventas</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'ventas:venta_list' %}">💰 Ventas</a></li>
+                            <li><a class="dropdown-item" href="{% url 'ventas:cliente_list' %}">👤 Clientes</a></li>
                         </ul>
                     </li>
 
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navContabilidad" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <a class="nav-link dropdown-toggle" href="#" id="navContabilidad"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Contabilidad
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navContabilidad">
-                            <li><a class="dropdown-item" href="{% url 'contabilidad:movimiento_list' %}">Movimientos</a></li>
-                            <li><a class="dropdown-item" href="{% url 'contabilidad:reporte_balance' %}">Balance</a></li>
+                            <li><h6 class="dropdown-header">Contabilidad</h6></li>
+                            <li><a class="dropdown-item" href="{% url 'contabilidad:movimiento_list' %}">📊 Movimientos</a></li>
+                            <li><a class="dropdown-item" href="{% url 'contabilidad:reporte_balance' %}">⚖️ Balance</a></li>
                         </ul>
                     </li>
 
@@ -74,52 +120,82 @@
                     </li>
 
                 </ul>
-                <ul class="navbar-nav">
+
+                <!-- Usuario y logout -->
+                <ul class="navbar-nav align-items-lg-center gap-2">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
-                            <span class="nav-link disabled text-white-50">{{ user.username }}</span>
+                            <span class="nav-user-badge">👤 {{ user.username }}</span>
                         </li>
                         <li class="nav-item">
-                            <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            <form method="post" action="{% url 'logout' %}" class="m-0">
                                 {% csrf_token %}
-                                <button type="submit" class="nav-link btn btn-link text-white p-0" style="text-decoration: none;">Salir</button>
+                                <button type="submit" class="btn-logout">Salir</button>
                             </form>
                         </li>
                     {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{% url 'login' %}">Ingresar</a></li>
+                        <li class="nav-item">
+                            <a class="btn-login" href="{% url 'login' %}">Ingresar</a>
+                        </li>
                     {% endif %}
                 </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-2">
-        <nav aria-label="breadcrumb">
-            <ol class="breadcrumb">
-                {% block breadcrumbs %}
-                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
-                {% endblock %}
-            </ol>
-        </nav>
+    <!-- BREADCRUMBS -->
+    <div class="breadcrumb-bar">
+        <div class="container">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-0">
+                    {% block breadcrumbs %}
+                    <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Inicio</a></li>
+                    {% endblock %}
+                </ol>
+            </nav>
+        </div>
     </div>
 
-    <div class="container mt-2">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
-                </div>
-            {% endfor %}
-        {% endif %}
+    <!-- MENSAJES -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 shadow-sm" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+            </div>
+        {% endfor %}
     </div>
+    {% endif %}
 
-    <main class="container my-4">
-        {% block content %}{% endblock %}
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content">
+        <div class="container">
+            {% block content %}{% endblock %}
+        </div>
     </main>
 
-    <footer class="bg-dark text-white text-center py-3 mt-4">
-        <p>&copy; 2026 Zapatería - SISTEMAINV</p>
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="container d-flex align-items-center justify-content-center gap-3">
+            <!-- Logo pequeño en footer -->
+            <svg width="22" height="22" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M50 2 L95 26.5 L95 88.5 L50 113 L5 88.5 L5 26.5 Z" fill="url(#hexGradFooter)"/>
+                <path d="M62 38 C62 38 36 36 36 48 C36 58 62 56 62 67 C62 79 36 77 36 77"
+                      stroke="white" stroke-width="10" stroke-linecap="round" fill="none"/>
+                <defs>
+                    <linearGradient id="hexGradFooter" x1="0" y1="0" x2="100" y2="115" gradientUnits="userSpaceOnUse">
+                        <stop offset="0%" stop-color="#0f3460"/>
+                        <stop offset="100%" stop-color="#e94560"/>
+                    </linearGradient>
+                </defs>
+            </svg>
+            <span class="footer-logo">SISTEMA<span>INV</span></span>
+            <span class="text-white-50">·</span>
+            <span>Sistema de Gestión para Zapatería</span>
+            <span class="text-white-50">·</span>
+            <span>&copy; 2026</span>
+        </div>
     </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>

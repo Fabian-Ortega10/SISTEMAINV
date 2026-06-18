@@ -1,161 +1,504 @@
-/* Estilos globales */
+/* ============================================================
+   SISTEMAINV — styles.css con logo integrado
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+/* ── Variables ── */
+:root {
+    --primary:    #1a1a2e;
+    --accent:     #e94560;
+    --accent2:    #0f3460;
+    --nav-bg:     #16213e;
+    --light:      #f4f6f9;
+    --white:      #ffffff;
+    --gray:       #6c757d;
+    --border:     #dee2e6;
+    --radius:     10px;
+    --shadow:     0 2px 16px rgba(0,0,0,0.08);
+    --transition: 0.2s ease;
+}
+
+* { box-sizing: border-box; }
+
 body {
-    font-family: 'Roboto', Arial, sans-serif;
-    margin: 0;
-    background-color: #f8f9fa;
+    font-family: 'Inter', Arial, sans-serif;
+    background-color: var(--light);
     color: #212529;
-}
-
-/* Cabecera */
-.header {
-    background: #343a40;
-    color: white;
-    padding: 15px;
-    text-align: center;
-}
-
-/* Navbar personalizada */
-.navbar {
-    background: #007bff;
-    padding: 10px;
-}
-
-.navbar ul {
-    list-style: none;
     margin: 0;
-    padding: 0;
-    display: flex;
-}
-
-.navbar li {
-    margin-right: 15px;
-}
-
-.navbar a {
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-    padding: 8px 12px;
-    border-radius: 4px;
-}
-
-.navbar a:hover {
-    background-color: #0056b3;
-    text-decoration: none;
-}
-
-/* Contenido */
-.content {
-    padding: 20px;
-}
-
-/* Tablas */
-.table {
-    border-radius: 5px;
-    overflow: hidden;
-}
-
-.table th, .table td {
-    vertical-align: middle;
-}
-
-/* Botones personalizados */
-.btn-guardar,
-.btn-primary {
-    background-color: #007bff;
-    border: none;
-    padding: 10px 15px;
-    color: white;
-    font-weight: bold;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-.btn-guardar:hover,
-.btn-primary:hover {
-    background-color: #0056b3;
-    color: #fff;
-}
-
-/* Footer */
-.footer {
-    background: #343a40;
-    color: white;
-    text-align: center;
-    padding: 10px;
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    font-size: 0.9rem;
-}
-
-/* Títulos */
-h2 {
-    color: #343a40;
-    font-weight: 600;
+    font-size: 0.95rem;
 }
 
 /* ============================================================
-   FIX v2: Dropdowns de Bootstrap dentro del navbar custom
+   HEADER
    ============================================================ */
+.site-header {
+    background: var(--primary);
+    padding: 0.7rem 0;
+    border-bottom: 3px solid var(--accent);
+}
 
-/* El texto de los items del dropdown debe ser oscuro, no blanco */
-.navbar-nav .dropdown-menu a.dropdown-item,
-.navbar-nav .dropdown-menu .dropdown-item {
+.site-header a:hover {
+    opacity: 0.9;
+}
+
+/* Texto del logo en header */
+.site-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.5px;
+    line-height: 1.1;
+    font-family: 'Inter', sans-serif;
+}
+
+.site-title-accent {
+    color: var(--accent);
+}
+
+.site-subtitle {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.45);
+    letter-spacing: 0.8px;
+    line-height: 1;
+    margin-top: 2px;
+}
+
+/* ============================================================
+   NAVBAR
+   ============================================================ */
+.site-navbar {
+    background: var(--nav-bg) !important;
+    padding: 0;
+    min-height: 46px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.25);
+}
+
+/* Nav links */
+.site-navbar .navbar-nav .nav-link {
+    color: rgba(255,255,255,0.78) !important;
+    font-size: 0.875rem;
+    font-weight: 500;
+    padding: 0.82rem 0.85rem !important;
+    transition: color var(--transition), background var(--transition);
+    white-space: nowrap;
+}
+
+.site-navbar .navbar-nav .nav-link:hover {
+    color: #ffffff !important;
+    background: rgba(255,255,255,0.07) !important;
+}
+
+/* Dropdown */
+.site-navbar .dropdown-menu {
+    background: #ffffff;
+    border: none;
+    border-radius: var(--radius);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.14);
+    padding: 0.4rem 0;
+    min-width: 200px;
+    margin-top: 0 !important;
+}
+
+.site-navbar .dropdown-header {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gray);
+    padding: 0.5rem 1rem 0.25rem;
+}
+
+.site-navbar .dropdown-item {
+    font-size: 0.875rem;
     color: #212529 !important;
-    background-color: transparent !important;
-    font-weight: normal !important;
-    padding: 0.4rem 1rem !important;
+    padding: 0.5rem 1rem !important;
+    font-weight: 400;
+    transition: background var(--transition);
     display: block !important;
     text-decoration: none !important;
+    background: transparent !important;
 }
 
-.navbar-nav .dropdown-menu a.dropdown-item:hover,
-.navbar-nav .dropdown-menu .dropdown-item:hover {
-    background-color: #e9ecef !important;
-    color: #212529 !important;
+.site-navbar .dropdown-item:hover {
+    background: #f0f4ff !important;
+    color: var(--accent2) !important;
 }
 
-/* La caja del dropdown: blanca, oculta por defecto, visible solo con .show */
-.navbar-nav .dropdown-menu {
-    display: none;
-    background-color: #ffffff !important;
-    border: 1px solid rgba(0,0,0,0.15);
-    border-radius: 4px;
-    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-    min-width: 200px;
-    padding: 0.5rem 0;
-    margin: 0;
-    position: absolute;
-    z-index: 1050;
+/* Fix: anula reglas genéricas que desalinean el nav */
+.site-navbar .navbar-nav {
+    flex-direction: row;
+    align-items: stretch;
 }
 
-.navbar-nav .dropdown-menu.show {
-    display: block;
-}
-
-/* Anula el margin-right que .navbar li aplica a los <li> internos del dropdown */
-.navbar-nav .dropdown-menu > li {
+.site-navbar .navbar-nav .nav-item {
     margin-right: 0 !important;
 }
 
+.site-navbar .dropdown-menu > li {
+    margin-right: 0 !important;
+}
+
+/* Badge usuario */
+.nav-user-badge {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.85);
+    font-size: 0.8rem;
+    font-weight: 500;
+    padding: 0.28rem 0.75rem;
+    border-radius: 50px;
+    white-space: nowrap;
+    display: inline-block;
+}
+
+/* Botón Salir */
+.btn-logout {
+    background: rgba(233,69,96,0.14);
+    color: #e94560 !important;
+    border: 1px solid rgba(233,69,96,0.4);
+    border-radius: 6px;
+    padding: 0.28rem 0.85rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-logout:hover {
+    background: var(--accent);
+    color: white !important;
+    border-color: var(--accent);
+}
+
+/* Botón Ingresar */
+.btn-login {
+    background: var(--accent);
+    color: white !important;
+    border-radius: 6px;
+    padding: 0.3rem 1rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: all var(--transition);
+    display: inline-block;
+}
+
+.btn-login:hover {
+    background: #c73652;
+    color: white !important;
+}
+
+/* ============================================================
+   BREADCRUMB
+   ============================================================ */
+.breadcrumb-bar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 0.5rem 0;
+}
+
+.breadcrumb {
+    font-size: 0.82rem;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+}
+
+.breadcrumb-item a {
+    color: var(--accent2);
+    text-decoration: none;
+}
+
+.breadcrumb-item a:hover {
+    color: var(--accent);
+    text-decoration: underline;
+}
+
+.breadcrumb-item.active {
+    color: var(--gray);
+}
+
+/* ============================================================
+   CONTENIDO PRINCIPAL
+   ============================================================ */
+.main-content {
+    padding: 2.5rem 0 4rem;
+    min-height: calc(100vh - 270px);
+}
+
+.main-content h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.25rem;
+}
+
+/* ============================================================
+   FORMULARIOS CENTRADOS
+   ============================================================ */
+.form-wrapper {
+    max-width: 640px;
+    margin: 0 auto;
+    background: var(--white);
+    border-radius: var(--radius);
+    padding: 2rem 2.5rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+}
+
+.main-content input[type="text"],
+.main-content input[type="email"],
+.main-content input[type="number"],
+.main-content input[type="password"],
+.main-content input[type="date"],
+.main-content select,
+.main-content textarea,
+.form-control,
+.form-select {
+    border-radius: 8px !important;
+    border: 1px solid #ced4da;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.9rem;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    width: 100%;
+    font-family: 'Inter', sans-serif;
+}
+
+.main-content input:focus,
+.main-content select:focus,
+.main-content textarea:focus,
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent2) !important;
+    box-shadow: 0 0 0 3px rgba(15,52,96,0.1) !important;
+    outline: none;
+}
+
+.form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #495057;
+    margin-bottom: 0.3rem;
+}
+
+/* Login */
 #id_username,
 #id_password {
     display: block;
     width: 100%;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    color: #212529;
-    background-color: #fff;
+    padding: 0.5rem 0.85rem;
+    font-size: 0.95rem;
     border: 1px solid #ced4da;
-    border-radius: 0.375rem;
+    border-radius: 8px;
+    color: #212529;
+    background: #fff;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    font-family: 'Inter', sans-serif;
 }
- 
+
 #id_username:focus,
 #id_password:focus {
-    border-color: #86b7fe;
-    outline: 0;
-    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    border-color: var(--accent2);
+    box-shadow: 0 0 0 3px rgba(15,52,96,0.1);
+    outline: none;
+}
+
+/* ============================================================
+   CARDS
+   ============================================================ */
+.card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    transition: transform var(--transition), box-shadow var(--transition);
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.1);
+}
+
+.card-header {
+    border-radius: var(--radius) var(--radius) 0 0 !important;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* ============================================================
+   TABLAS
+   ============================================================ */
+.table {
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--white);
+    font-size: 0.9rem;
+    box-shadow: var(--shadow);
+}
+
+.table thead th {
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 0.85rem 1rem;
+    vertical-align: middle;
+    border-bottom: none;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 0.75rem 1rem;
+    color: #343a40;
+}
+
+.table tbody tr:hover {
+    background: #f8f9ff;
+}
+
+/* ============================================================
+   BOTONES
+   ============================================================ */
+.btn {
+    border-radius: 7px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.45rem 1rem;
+    transition: all var(--transition);
+    font-family: 'Inter', sans-serif;
+}
+
+.btn-primary {
+    background: var(--accent2) !important;
+    border-color: var(--accent2) !important;
+    color: white !important;
+}
+
+.btn-primary:hover {
+    background: #0a2540 !important;
+    border-color: #0a2540 !important;
+}
+
+.btn-sm {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.7rem;
+    border-radius: 6px;
+}
+
+/* ============================================================
+   ALERTAS
+   ============================================================ */
+.alert {
+    border: none;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+.site-footer {
+    background: var(--primary);
+    color: rgba(255,255,255,0.5);
+    padding: 0.9rem 0;
+    font-size: 0.82rem;
+    border-top: 3px solid var(--accent);
+    text-align: center;
+}
+
+.footer-logo {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: white;
+    letter-spacing: -0.5px;
+    font-family: 'Inter', sans-serif;
+}
+
+.footer-logo span {
+    color: var(--accent);
+}
+
+/* ============================================================
+   BADGES
+   ============================================================ */
+.badge {
+    font-weight: 600;
+    font-size: 0.75rem;
+    border-radius: 6px;
+    padding: 0.3em 0.6em;
+}
+
+/* ============================================================
+   LOGIN PAGE — pantalla de inicio de sesión
+   ============================================================ */
+.login-page {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 2rem;
+}
+ 
+.login-card {
+    background: var(--white);
+    border-radius: 14px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.1);
+    border: 1px solid var(--border);
+    padding: 2.5rem 2.5rem 2rem;
+    width: 100%;
+    max-width: 420px;
+}
+ 
+.login-brand {
+    text-align: center;
+    margin-bottom: 1.8rem;
+}
+ 
+.login-brand svg {
+    margin-bottom: 0.8rem;
+}
+ 
+.login-welcome {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--primary);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.2rem;
+}
+ 
+.login-subtitle {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-bottom: 0;
+}
+ 
+.login-subtitle .text-accent {
+    color: var(--accent);
+    font-weight: 700;
+}
+ 
+.login-form .form-label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: #495057;
+}
+ 
+.btn-login-submit {
+    background: var(--accent2);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 0.65rem 1rem;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-top: 0.5rem;
+    transition: background var(--transition);
+    cursor: pointer;
+}
+ 
+.btn-login-submit:hover {
+    background: #0a2540;
+    color: white;
 }
