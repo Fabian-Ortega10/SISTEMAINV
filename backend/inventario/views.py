@@ -17,7 +17,11 @@ class ProductoListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
 class ProductoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Producto
-    fields = ['nombre', 'categoria', 'precio', 'stock', 'descripcion']
+    fields = [
+        'nombre', 'categoria', 'tipo',
+        'precio_costo', 'precio_venta',
+        'unidad_medida', 'stock', 'descripcion',
+    ]
     template_name = "inventario/producto_form.html"
     success_url = reverse_lazy('inventario:producto_list')
     permission_required = "inventario.add_producto"
@@ -34,7 +38,11 @@ class ProductoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView
 
 class ProductoUpdateView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
     model = Producto
-    fields = ['nombre', 'categoria', 'precio', 'stock', 'descripcion']
+    fields = [
+        'nombre', 'categoria', 'tipo',
+        'precio_costo', 'precio_venta',
+        'unidad_medida', 'stock', 'descripcion',
+    ]
     template_name = "inventario/producto_form.html"
     success_url = reverse_lazy('inventario:producto_list')
     permission_required = "inventario.change_producto"
@@ -114,26 +122,33 @@ class CategoriaDeleteView(LoginRequiredMixin, PermissionRequiredMixin, DeleteVie
         return super().form_valid(form)
 
 
-# ── Exportación CSV ────────────────────────────────────────────────────────────
-
+# ── Exportación CSV ─────────────────────────────────────────────────────────────
 @login_required
 @permission_required('inventario.view_producto', raise_exception=True)
 def exportar_inventario_csv(request):
     response = HttpResponse(content_type='text/csv; charset=utf-8')
     response['Content-Disposition'] = 'attachment; filename="inventario.csv"'
-    response.write('\ufeff')  # BOM para que Excel abra correctamente en Windows
+    response.write('\ufeff')
 
     writer = csv.writer(response)
-    writer.writerow(['ID', 'Nombre', 'Categoría', 'Precio', 'Stock', 'Descripción'])
+    writer.writerow([
+        'ID', 'Nombre', 'Categoría', 'Tipo',
+        'Precio Costo', 'Precio Venta', 'Margen %',
+        'Stock', 'Unidad de Medida', 'Descripción',
+    ])
 
-    for producto in Producto.objects.select_related('categoria').order_by('nombre'):
+    for p in Producto.objects.select_related('categoria').order_by('nombre'):
         writer.writerow([
-            producto.id,
-            producto.nombre,
-            producto.categoria.nombre if producto.categoria else '—',
-            producto.precio,
-            producto.stock,
-            producto.descripcion or '—',
+            p.id,
+            p.nombre,
+            p.categoria.nombre if p.categoria else '—',
+            p.get_tipo_display(),
+            p.precio_costo,
+            p.precio_venta,
+            f"{p.margen_ganancia}%" if p.margen_ganancia is not None else '—',
+            p.stock,
+            p.get_unidad_medida_display(),
+            p.descripcion or '—',
         ])
 
     return response

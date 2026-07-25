@@ -8,44 +8,73 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Lista de Productos</h2>
-        <div class="d-flex gap-2">
-            <a href="{% url 'inventario:inventario_create' %}" class="btn btn-success">Nuevo producto</a>
-            <a href="{% url 'inventario:exportar_csv' %}" class="btn btn-outline-secondary">⬇ Exportar CSV</a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Lista de Productos</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'inventario:inventario_create' %}" class="btn btn-success">Nuevo producto</a>
+        <a href="{% url 'inventario:exportar_csv' %}" class="btn btn-outline-secondary">⬇ Exportar CSV</a>
     </div>
-
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>Nombre</th>
-                <th>Categoría</th>
-                <th>Precio</th>
-                <th>Stock</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for producto in object_list %}
-            <tr>
-                <td>{{ producto.nombre }}</td>
-                <td>{{ producto.categoria }}</td>
-                <td>{{ producto.precio }}</td>
-                <td>{{ producto.stock }}</td>
-                <td>
-                    <a href="{% url 'inventario:inventario_update' producto.id %}" class="btn btn-primary btn-sm">Editar</a>
-                    <a href="{% url 'inventario:inventario_delete' producto.id %}" class="btn btn-danger btn-sm">Eliminar</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="5" class="text-center">No hay productos registrados en el inventario.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
-{% endblock %}
 
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Nombre</th>
+            <th>Categoría</th>
+            <th>Tipo</th>
+            <th>Precio Costo</th>
+            <th>Precio Venta</th>
+            <th>Margen</th>
+            <th>Stock</th>
+            <th>Unidad</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for producto in object_list %}
+        <tr>
+            <td><strong>{{ producto.nombre }}</strong></td>
+            <td>{{ producto.categoria }}</td>
+            <td>
+                {% if producto.tipo == "MP" %}
+                    <span class="badge bg-warning text-dark">Materia Prima</span>
+                {% else %}
+                    <span class="badge bg-success">Producto Terminado</span>
+                {% endif %}
+            </td>
+            <td>${{ producto.precio_costo }}</td>
+            <td>${{ producto.precio_venta }}</td>
+            <td>
+                {% if producto.margen_ganancia is not None %}
+                    {% if producto.margen_ganancia >= 0 %}
+                        <span class="badge bg-success">{{ producto.margen_ganancia }}%</span>
+                    {% else %}
+                        <span class="badge bg-danger">{{ producto.margen_ganancia }}%</span>
+                    {% endif %}
+                {% else %}
+                    <span class="text-muted">—</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if producto.stock <= 5 %}
+                    <span class="badge bg-danger">{{ producto.stock }}</span>
+                {% else %}
+                    {{ producto.stock }}
+                {% endif %}
+            </td>
+            <td>
+                <span class="badge bg-secondary">{{ producto.get_unidad_medida_display }}</span>
+            </td>
+            <td>
+                <a href="{% url 'inventario:inventario_update' producto.id %}" class="btn btn-primary btn-sm">Editar</a>
+                <a href="{% url 'inventario:inventario_delete' producto.id %}" class="btn btn-danger btn-sm">Eliminar</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="9" class="text-center text-muted">No hay productos registrados.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
