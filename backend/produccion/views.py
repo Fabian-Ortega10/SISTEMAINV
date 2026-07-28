@@ -2,18 +2,31 @@ from django.views.generic import ListView, CreateView, UpdateView, DeleteView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
-from django.forms import inlineformset_factory
+from django.forms import inlineformset_factory, ModelChoiceField
 from django.shortcuts import redirect
 from django.utils import timezone
 
 from .models import OrdenProduccion, ConsumoMateriaPrima, ProductoFinal
+from inventario.models import Producto
 from core.services.inventario import (
     finalizar_orden_produccion,
     StockInsuficienteError,
 )
 
 
-# ── Formsets ────────────────────────────────────────────────────────────────────
+# ── Querysets filtrados por tipo ────────────────────────────────────────────────
+# Solo materias primas aparecen en el formset de consumo
+qs_materias_primas = Producto.objects.filter(
+    tipo=Producto.TipoProducto.MATERIA_PRIMA
+).order_by("nombre")
+
+# Solo productos terminados aparecen en el formset de productos finales
+qs_productos_terminados = Producto.objects.filter(
+    tipo=Producto.TipoProducto.PRODUCTO_TERMINADO
+).order_by("nombre")
+
+
+# ── Formsets con querysets filtrados ────────────────────────────────────────────
 ConsumoFormSet = inlineformset_factory(
     OrdenProduccion,
     ConsumoMateriaPrima,
@@ -29,6 +42,20 @@ ProductoFinalFormSet = inlineformset_factory(
     extra=1,
     can_delete=True,
 )
+
+
+def _aplicar_querysets(formset, qs_materias, qs_terminados, es_consumo=True):
+    """
+    Restringe el queryset del campo 'producto' en cada form del formset
+    según si es consumo (materias primas) o producto final (terminados).
+    Se llama después de instanciar el formset.
+    """
+    qs = qs_materias if es_consumo else qs_terminados
+    for form in formset.forms:
+        form.fields["producto"].queryset = qs
+        form.fields["producto"].label = (
+            "Materia prima" if es_consumo else "Producto terminado"
+        )
 
 
 # ── Lista ─────────────────────────────────────────────────────────────────────
@@ -52,27 +79,31 @@ class OrdenProduccionCreateView(LoginRequiredMixin, PermissionRequiredMixin, Cre
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context["consumo_formset"] = ConsumoFormSet(self.request.POST, prefix="consumo")
-            context["final_formset"] = ProductoFinalFormSet(self.request.POST, prefix="final")
+            consumo_fs = ConsumoFormSet(self.request.POST, prefix="consumo")
+            final_fs   = ProductoFinalFormSet(self.request.POST, prefix="final")
         else:
-            context["consumo_formset"] = ConsumoFormSet(prefix="consumo")
-            context["final_formset"] = ProductoFinalFormSet(prefix="final")
+            consumo_fs = ConsumoFormSet(prefix="consumo")
+            final_fs   = ProductoFinalFormSet(prefix="final")
+
+        # Aplicar filtros de tipo
+        _aplicar_querysets(consumo_fs, qs_materias_primas, qs_productos_terminados, es_consumo=True)
+        _aplicar_querysets(final_fs,   qs_materias_primas, qs_productos_terminados, es_consumo=False)
+
+        context["consumo_formset"] = consumo_fs
+        context["final_formset"]   = final_fs
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         consumo_formset = context["consumo_formset"]
-        final_formset = context["final_formset"]
+        final_formset   = context["final_formset"]
 
-        # Una orden nueva nunca puede crearse ya FINALIZADA directamente.
-        # Forzamos PENDIENTE al crear; la finalización se hace después,
-        # editando la orden, para garantizar que los formsets ya existen.
         form.instance.estado = "PENDIENTE"
 
         if consumo_formset.is_valid() and final_formset.is_valid():
             self.object = form.save()
             consumo_formset.instance = self.object
-            final_formset.instance = self.object
+            final_formset.instance   = self.object
             consumo_formset.save()
             final_formset.save()
             messages.success(self.request, "Orden de producción registrada correctamente.")
@@ -98,35 +129,35 @@ class OrdenProduccionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Upd
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         if self.request.POST:
-            context["consumo_formset"] = ConsumoFormSet(
-                self.request.POST, instance=self.object, prefix="consumo"
-            )
-            context["final_formset"] = ProductoFinalFormSet(
-                self.request.POST, instance=self.object, prefix="final"
-            )
+            consumo_fs = ConsumoFormSet(self.request.POST, instance=self.object, prefix="consumo")
+            final_fs   = ProductoFinalFormSet(self.request.POST, instance=self.object, prefix="final")
         else:
-            context["consumo_formset"] = ConsumoFormSet(instance=self.object, prefix="consumo")
-            context["final_formset"] = ProductoFinalFormSet(instance=self.object, prefix="final")
+            consumo_fs = ConsumoFormSet(instance=self.object, prefix="consumo")
+            final_fs   = ProductoFinalFormSet(instance=self.object, prefix="final")
+
+        # Aplicar filtros de tipo
+        _aplicar_querysets(consumo_fs, qs_materias_primas, qs_productos_terminados, es_consumo=True)
+        _aplicar_querysets(final_fs,   qs_materias_primas, qs_productos_terminados, es_consumo=False)
+
+        context["consumo_formset"] = consumo_fs
+        context["final_formset"]   = final_fs
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         consumo_formset = context["consumo_formset"]
-        final_formset = context["final_formset"]
+        final_formset   = context["final_formset"]
 
         if not (consumo_formset.is_valid() and final_formset.is_valid()):
             messages.error(self.request, "Revisa los materiales y productos ingresados.")
             return self.render_to_response(self.get_context_data(form=form))
 
         orden = self.object
-        # Leer el estado REAL desde BD antes de que el form lo sobreescriba
-        estado_anterior = OrdenProduccion.objects.values_list('estado', flat=True).get(pk=orden.pk)
+        estado_anterior = OrdenProduccion.objects.values_list(
+            'estado', flat=True
+        ).get(pk=orden.pk)
 
-        # Si la orden ya estaba finalizada, no se permite editar materiales/productos
-        # ni volver a finalizar (evita doble descuento/ingreso de stock).
         if orden.ya_finalizada:
-            # Bloqueamos cambios de estado y de líneas; solo se permite
-            # actualizar la descripción.
             if form.cleaned_data["estado"] != "FINALIZADA":
                 messages.error(
                     self.request,
@@ -142,22 +173,18 @@ class OrdenProduccionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Upd
             )
             return redirect(self.success_url)
 
-        # Orden aún no finalizada: guardamos cambios normales primero
         self.object = form.save()
         consumo_formset.instance = self.object
-        final_formset.instance = self.object
+        final_formset.instance   = self.object
         consumo_formset.save()
         final_formset.save()
 
         nuevo_estado = self.object.estado
 
-        # Transición PENDIENTE -> FINALIZADA: ejecutar el ajuste de stock
         if estado_anterior != "FINALIZADA" and nuevo_estado == "FINALIZADA":
             try:
                 finalizar_orden_produccion(self.object)
             except StockInsuficienteError as e:
-                # Revertimos el estado a PENDIENTE: no hay suficiente
-                # materia prima para finalizar esta orden todavía.
                 self.object.estado = "PENDIENTE"
                 self.object.save(update_fields=["estado"])
                 messages.error(self.request, f"No se pudo finalizar la orden: {e}")
@@ -176,7 +203,7 @@ class OrdenProduccionUpdateView(LoginRequiredMixin, PermissionRequiredMixin, Upd
         return redirect(self.success_url)
 
     def form_invalid(self, form):
-        messages.error(self.request, "Error al actualizar la orden de producción. Verifique los datos.")
+        messages.error(self.request, "Error al actualizar la orden. Verifique los datos.")
         return super().form_invalid(form)
 
 

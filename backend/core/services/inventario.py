@@ -38,8 +38,9 @@ def _registrar_movimiento(tipo: str, descripcion: str, monto: Decimal) -> None:
 @transaction.atomic
 def procesar_detalle_compra(detalle) -> None:
     """
-    Ejecutar SOLO al crear un DetalleCompra.
-    Aumenta stock y registra egreso contable.
+    Al crear un DetalleCompra: aumenta stock y registra egreso contable.
+    Usa precio_unitario del detalle (el precio real pactado con el proveedor),
+    NO el precio_costo del producto, para mayor precisión contable.
     """
     producto = _ajustar_stock(detalle.producto_id, detalle.cantidad)
     monto = detalle.cantidad * detalle.precio_unitario
@@ -55,7 +56,7 @@ def procesar_detalle_compra(detalle) -> None:
 
 @transaction.atomic
 def revertir_detalle_compra(detalle) -> None:
-    """Ejecutar al eliminar un DetalleCompra. Revierte stock y egreso."""
+    """Al eliminar un DetalleCompra: revierte stock y egreso."""
     producto = _ajustar_stock(detalle.producto_id, -detalle.cantidad)
     monto = detalle.cantidad * detalle.precio_unitario
     _registrar_movimiento(
@@ -73,8 +74,8 @@ def revertir_detalle_compra(detalle) -> None:
 @transaction.atomic
 def procesar_detalle_venta(detalle) -> None:
     """
-    Ejecutar SOLO al crear un DetalleVenta.
-    Disminuye stock y registra ingreso contable.
+    Al crear un DetalleVenta: disminuye stock y registra ingreso contable.
+    Usa precio_unitario del detalle (precio_venta al momento de la venta).
     """
     producto = _ajustar_stock(detalle.producto_id, -detalle.cantidad)
     monto = detalle.cantidad * detalle.precio_unitario
@@ -90,7 +91,7 @@ def procesar_detalle_venta(detalle) -> None:
 
 @transaction.atomic
 def revertir_detalle_venta(detalle) -> None:
-    """Ejecutar al eliminar un DetalleVenta. Revierte stock e ingreso."""
+    """Al eliminar un DetalleVenta: revierte stock e ingreso."""
     producto = _ajustar_stock(detalle.producto_id, detalle.cantidad)
     monto = detalle.cantidad * detalle.precio_unitario
     _registrar_movimiento(
@@ -104,32 +105,21 @@ def revertir_detalle_venta(detalle) -> None:
 
 
 # ── Producción ──────────────────────────────────────────────────────────────
-#
-# Filosofía: las filas de ConsumoMateriaPrima y ProductoFinal NO afectan
-# stock al crearse (la orden puede estar en planeación y modificarse).
-# El stock se ajusta UNA SOLA VEZ, cuando la orden pasa a estado FINALIZADA,
-# mediante finalizar_orden_produccion().
 
 @transaction.atomic
 def finalizar_orden_produccion(orden) -> None:
     """
-    Ejecutar cuando una OrdenProduccion cambia su estado a FINALIZADA.
-
-    - Descuenta del stock cada ConsumoMateriaPrima (valida que haya
-      suficiente materia prima; si no, lanza StockInsuficienteError
-      y revierte toda la transacción).
-    - Aumenta el stock de cada ProductoFinal generado.
-    - Registra movimientos contables de egreso (consumo de materiales)
-      e ingreso (valor de producción) si se desea trazabilidad contable.
-
-    Esta función es idempotente a nivel de uso: debe llamarse una sola
-    vez por orden. La vista es responsable de no volver a llamarla si
-    la orden ya estaba FINALIZADA (ver OrdenProduccionUpdateView).
+    Al finalizar una OrdenProduccion:
+    - Descuenta stock de cada ConsumoMateriaPrima usando precio_costo
+      del producto (costo real de la materia prima consumida).
+    - Aumenta stock de cada ProductoFinal usando precio_costo
+      del producto terminado generado.
     """
-    # 1. Descontar materias primas consumidas
+    # 1. Descontar materias primas → EGRESO al precio_costo
     for consumo in orden.consumomateriaprima_set.select_related("producto"):
         producto = _ajustar_stock(consumo.producto_id, -consumo.cantidad)
-        monto = consumo.cantidad * producto.precio
+        # Usar precio_costo: refleja el costo real de la materia prima consumida
+        monto = consumo.cantidad * producto.precio_costo
         _registrar_movimiento(
             tipo="EGRESO",
             descripcion=(
@@ -139,10 +129,11 @@ def finalizar_orden_produccion(orden) -> None:
             monto=monto,
         )
 
-    # 2. Aumentar stock de productos finales generados
+    # 2. Agregar productos finales → INGRESO al precio_costo del terminado
     for final in orden.productofinal_set.select_related("producto"):
         producto = _ajustar_stock(final.producto_id, final.cantidad)
-        monto = final.cantidad * producto.precio
+        # Usar precio_costo: representa el valor de producción, no el precio de venta
+        monto = final.cantidad * producto.precio_costo
         _registrar_movimiento(
             tipo="INGRESO",
             descripcion=(
