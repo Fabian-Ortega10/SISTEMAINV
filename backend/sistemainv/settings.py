@@ -73,7 +73,6 @@ WSGI_APPLICATION = 'sistemainv.wsgi.application'
 
 # ── Base de datos ──────────────────────────────────────────────────────────────
 if os.environ.get('DATABASE_URL'):
-    # Render: usa la variable DATABASE_URL del panel
     DATABASES = {
         'default': dj_database_url.config(
             default=os.environ.get('DATABASE_URL'),
@@ -81,7 +80,6 @@ if os.environ.get('DATABASE_URL'):
         )
     }
 else:
-    # Local: lee del .env — nunca hardcodeado en el código
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -102,8 +100,8 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # ── Internacionalización ───────────────────────────────────────────────────────
-LANGUAGE_CODE = 'en-us'
-TIME_ZONE = 'UTC'
+LANGUAGE_CODE = 'es'
+TIME_ZONE = 'America/Bogota'
 USE_I18N = True
 USE_TZ = True
 
@@ -120,8 +118,22 @@ CSRF_TRUSTED_ORIGINS = [
 
 # ── Autenticación ──────────────────────────────────────────────────────────────
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = '/inventario/'
+LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = 'login'
+
+# ── Email — Recuperación de contraseña ────────────────────────────────────────
+# En local usamos la consola (imprime el email en la terminal, sin SMTP real)
+# En producción (Render) se usan las variables de entorno del panel
+EMAIL_BACKEND = os.environ.get(
+    'EMAIL_BACKEND',
+    'django.core.mail.backends.console.EmailBackend'  # local: muestra en consola
+)
+EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
+EMAIL_PORT          = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS       = os.environ.get('EMAIL_USE_TLS', 'True') == 'True'
+EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '')
+EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
+DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', 'SISTEMAINV <no-reply@sistemainv.com>')
 
 # ── Seguridad en producción ────────────────────────────────────────────────────
 if not DEBUG:
@@ -130,3 +142,5 @@ if not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    # En producción usar SMTP real
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

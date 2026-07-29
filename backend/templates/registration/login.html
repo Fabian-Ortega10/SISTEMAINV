@@ -11,7 +11,6 @@
 <div class="login-page">
     <div class="login-card">
 
-        <!-- Logo + bienvenida -->
         <div class="login-brand">
             <svg width="56" height="56" viewBox="0 0 100 115" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M50 2 L95 26.5 L95 88.5 L50 113 L5 88.5 L5 26.5 Z" fill="url(#hexGradLogin)"/>
@@ -25,7 +24,6 @@
                     </linearGradient>
                 </defs>
             </svg>
-
             <h2 class="login-welcome">Bienvenido</h2>
             <p class="login-subtitle">Ingresa a SISTEMA<span class="text-accent">INV</span> para continuar</p>
         </div>
@@ -49,6 +47,14 @@
             <input type="hidden" name="next" value="{{ next }}">
             <button type="submit" class="btn-login-submit w-100">Entrar</button>
         </form>
+
+        <!-- Enlace de recuperación de contraseña -->
+        <div class="text-center mt-3">
+            <a href="{% url 'password_reset' %}"
+               style="font-size:0.82rem;color:var(--gray);text-decoration:none;">
+                ¿Olvidaste tu contraseña?
+            </a>
+        </div>
 
     </div>
 </div>
