@@ -8,51 +8,65 @@
 {% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h2>Órdenes de Compra</h2>
-        <div class="d-flex gap-2">
-            <a href="{% url 'compras:ordencompra_create' %}" class="btn btn-primary">+ Nueva Orden de Compra</a>
-            <a href="{% url 'compras:exportar_csv' %}" class="btn btn-outline-secondary">⬇ Exportar CSV</a>
-        </div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Órdenes de Compra</h2>
+    <div class="d-flex gap-2">
+        <a href="{% url 'compras:ordencompra_create' %}" class="btn btn-primary">+ Nueva Orden</a>
+        <a href="{% url 'compras:exportar_csv' %}" class="btn btn-outline-secondary">⬇ Exportar CSV</a>
     </div>
-
-    <table class="table table-striped table-hover">
-        <thead class="table-dark">
-            <tr>
-                <th>#</th>
-                <th>Proveedor</th>
-                <th>Fecha</th>
-                <th>Productos</th>
-                <th>Total</th>
-                <th>Acciones</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for orden in ordenes %}
-            <tr>
-                <td>{{ orden.id }}</td>
-                <td>{{ orden.proveedor }}</td>
-                <td>{{ orden.fecha }}</td>
-                <td>
-                    {% for detalle in orden.detalles.all %}
-                        <small>{{ detalle.cantidad }}× {{ detalle.producto.nombre }}</small><br>
-                    {% empty %}
-                        <small class="text-muted">Sin productos</small>
-                    {% endfor %}
-                </td>
-                <td>${{ orden.get_total }}</td>
-                <td>
-                    <a href="{% url 'compras:ordencompra_update' orden.pk %}" class="btn btn-sm btn-warning">Editar</a>
-                    <a href="{% url 'compras:ordencompra_delete' orden.pk %}" class="btn btn-sm btn-danger">Eliminar</a>
-                </td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="6" class="text-center text-muted">No hay órdenes de compra registradas.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
+
+<table class="table table-striped table-hover align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>#</th>
+            <th>Proveedor</th>
+            <th>Fecha</th>
+            <th>Estado</th>
+            <th>Productos</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for orden in ordenes %}
+        <tr>
+            <td>{{ orden.id }}</td>
+            <td>{{ orden.proveedor }}</td>
+            <td>{{ orden.fecha }}</td>
+            <td>
+                {% if orden.estado == "PENDIENTE" %}
+                    <span class="badge bg-warning text-dark">Pendiente</span>
+                {% elif orden.estado == "RECIBIDA" %}
+                    <span class="badge bg-success">Recibida</span>
+                {% elif orden.estado == "CANCELADA" %}
+                    <span class="badge bg-danger">Cancelada</span>
+                {% endif %}
+            </td>
+            <td>
+                {% for detalle in orden.detalles.all %}
+                    <small>{{ detalle.cantidad }}× {{ detalle.producto.nombre }}</small><br>
+                {% empty %}
+                    <small class="text-muted">Sin productos</small>
+                {% endfor %}
+            </td>
+            <td>${{ orden.get_total }}</td>
+            <td>
+                {% if not orden.es_cancelada %}
+                    <a href="{% url 'compras:ordencompra_update' orden.pk %}"
+                       class="btn btn-sm btn-warning">Editar</a>
+                {% endif %}
+                {% if not orden.es_recibida %}
+                    <a href="{% url 'compras:ordencompra_delete' orden.pk %}"
+                       class="btn btn-sm btn-danger">Eliminar</a>
+                {% endif %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7" class="text-center text-muted">No hay órdenes de compra registradas.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
 {% endblock %}
